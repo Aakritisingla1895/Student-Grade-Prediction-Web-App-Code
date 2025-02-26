@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <h2 class="text-center">Teacher Login</h2>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+
+        <!-- Small Square Tabs -->
+        <div class="mt-4 text-center">
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{{ url_for('teacher_signup') }}" class="btn btn-outline-primary btn-square">Signup</a>
+                <a href="{{ url_for('student_login') }}" class="btn btn-outline-secondary btn-square">Student Login</a>
+                <a href="{{ url_for('admin_login') }}" class="btn btn-outline-secondary btn-square">Admin Login</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

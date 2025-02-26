@@ -11,8 +11,9 @@ body {
 }
 
 /* Custom CSS for small square tabs */
+/* Custom CSS for small square tabs */
 .btn-square {
-    width: 100px; /* Fixed width for square shape */
+    width: 120px; /* Fixed width for square shape */
     height: 40px; /* Fixed height for square shape */
     padding: 0; /* Remove padding to make it compact */
     display: flex;

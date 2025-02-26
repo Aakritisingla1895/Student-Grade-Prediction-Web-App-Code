@@ -6,13 +6,21 @@
         <div class="d-flex justify-content-center mb-4">
             <div class="nav nav-tabs" id="roleTabs" role="tablist">
                 <button class="nav-link active" id="student-tab" data-bs-toggle="tab" data-bs-target="#student" type="button" role="tab" aria-controls="student" aria-selected="true">Student</button>
-                <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab" aria-controls="admin" aria-selected="false">Admin</button>
+                <button class="nav-link" id="teacher-tab" data-bs-toggle="tab" data-bs-target="#teacher" type="button" role="tab" aria-controls="teacher" aria-selected="false">Teacher</button>
             </div>
         </div>
         <form method="POST">
-            <div class="mb-3">
+            <div class="mb-3" id="studentFields">
+                <label for="student_id" class="form-label">Student ID</label>
+                <input type="text" class="form-control" id="student_id" name="student_id">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="first_name" name="first_name">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="last_name" name="last_name">
+            </div>
+            <div class="mb-3" id="teacherFields" style="display: none;">
                 <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+                <input type="text" class="form-control" id="username" name="username">
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
@@ -33,9 +41,13 @@
 <script>
     document.getElementById('student-tab').addEventListener('click', function() {
         document.getElementById('role').value = 'student';
+        document.getElementById('studentFields').style.display = 'block';
+        document.getElementById('teacherFields').style.display = 'none';
     });
-    document.getElementById('admin-tab').addEventListener('click', function() {
-        document.getElementById('role').value = 'admin';
+    document.getElementById('teacher-tab').addEventListener('click', function() {
+        document.getElementById('role').value = 'teacher';
+        document.getElementById('studentFields').style.display = 'none';
+        document.getElementById('teacherFields').style.display = 'block';
     });
 </script>
 {% endblock %}

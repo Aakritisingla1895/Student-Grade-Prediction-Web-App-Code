@@ -2,10 +2,10 @@
 {% block content %}
 <div class="row justify-content-center mt-5">
     <div class="col-md-8">
-        <h2 class="text-center">Welcome to the Dashboard, {{ username }}!</h2>
-        <p class="text-center">You are logged in as a {{ session.role }}.</p>
+        <h2 class="text-center">Welcome to the Dashboard, {{ first_name }} {{ last_name }}!</h2>
+        <p class="text-center">You are logged in as a {{ role }}.</p>
         <div class="text-center">
-            <a href="{{ url_for('user_form') }}" class="btn btn-primary">Go to Student Forms</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
         </div>
     </div>
 </div>
