@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <h2 class="text-center">Test Prediction for {{ subject|title }}</h2>
+        <p class="text-center">You are logged in as a {{ role }}.</p>
+
+        <!-- Test Results -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Test Results</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>G1:</strong> {{ g1 }} / 20</p>
+                        <p><strong>G2:</strong> {{ g2 }} / 20</p>
+                        <p><strong>G3:</strong> {{ g3 }} / 20</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Average Grade:</strong> {{ average_grade }} / 20</p>
+                        <p><strong>Max Score:</strong> {{ max_score }} / 100</p>
+                        <p><strong>Predicted G4 Score:</strong> {{ predicted_g4 }} / 100</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title">Description</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>G1, G2, G3:</strong> These are the grades for the first, second, and third terms. Each is out of 20.</p>
+                <p><strong>Average Grade:</strong> The average grade across all terms. It is out of 20.</p>
+                <p><strong>Max Score:</strong> The maximum score achievable in the subject. It is out of 100.</p>
+                <p><strong>Predicted G4 Score:</strong> The predicted score for the fourth term (G4) based on the Random Forest model. It is out of 100.</p>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="text-center">
+            <a href="{{ url_for('user_form', subject='english') }}" class="btn btn-outline-primary">Back to English</a>
+            <a href="{{ url_for('user_form', subject='physics') }}" class="btn btn-outline-primary">Back to Physics</a>
+            <a href="{{ url_for('user_form', subject='mathematics') }}" class="btn btn-outline-primary">Back to Mathematics</a>
+            <a href="{{ url_for('user_form', subject='computer_science') }}" class="btn btn-outline-primary">Back to Computer Science</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

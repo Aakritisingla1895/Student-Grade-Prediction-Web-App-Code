@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 import bcrypt
 from datetime import timedelta
-
+import joblib 
 # Load environment variables
 load_dotenv()
 
@@ -233,7 +233,53 @@ def user_form(subject):
                            subject=subject,
                            student_data=student_data)
 
+@app.route("/test_prediction/<subject>", methods=["GET", "POST"])
+def test_prediction(subject):
+    if "username" not in session:
+        return redirect(url_for("login"))
 
+    student_id = session.get("username")  # Assuming student_id is stored in session
+
+    # Fetch subject-specific data
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Determine the table based on the subject
+    if subject == "english":
+        cur.execute("SELECT * FROM english_dataset WHERE student_id = %s", (student_id,))
+    elif subject == "physics":
+        cur.execute("SELECT * FROM physics_dataset WHERE student_id = %s", (student_id,))
+    elif subject == "mathematics":
+        cur.execute("SELECT * FROM maths_dataset WHERE student_id = %s", (student_id,))
+    elif subject == "computer_science":
+        cur.execute("SELECT * FROM computer_science_dataset WHERE student_id = %s", (student_id,))
+
+    student_data = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not student_data:
+        flash("No data found for this student.", "danger")
+        return redirect(url_for("dashboard"))
+
+    # Bypass model prediction for now
+    # Use dummy or autopopulated data for the prediction screen
+    g1 = student_data[24]  # G1
+    g2 = student_data[25]  # G2
+    g3 = student_data[26]  # G3
+    average_grade = student_data[29]  # Average Grade
+    max_score = student_data[30]  # Max Score
+    predicted_g4 = 52.89  # Dummy predicted G4 score (replace with actual logic later)
+
+    # Pass the fetched data and dummy prediction to the template
+    return render_template("test_prediction.html", 
+                           subject=subject,
+                           g1=g1,
+                           g2=g2,
+                           g3=g3,
+                           average_grade=average_grade,
+                           max_score=max_score,
+                           predicted_g4=predicted_g4)
 
 @app.route("/dashboard")
 def dashboard():
