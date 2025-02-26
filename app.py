@@ -41,7 +41,7 @@ def check_password(hashed_password, user_password):
 @app.before_request
 def check_session():
     # Exclude login, signup, and static routes from session check
-    if request.endpoint in ["login", "signup", "static"]:
+    if request.endpoint in ["login", "signup", "forgot_password", "static"]:
         return
 
     # Redirect to login if the user is not logged in
@@ -140,7 +140,7 @@ def signup():
 def forgot_password():
     if request.method == "POST":
         role = request.form["role"]
-        identifier = request.form["username"]  # This will be student_id or username
+        identifier = request.form["identifier"]  # This will be student_id or username
         new_password = request.form["new_password"]
 
         conn = get_db_connection()
@@ -162,11 +162,11 @@ def forgot_password():
 
             # Update password in the appropriate table
             if role == "student":
-                cur.execute("UPDATE students_users SET password = %s WHERE student_id = %s", (hashed_password.decode('utf-8'), identifier))
+                cur.execute("UPDATE students_users SET password = %s WHERE student_id = %s", (hashed_password, identifier))
             elif role == "teacher":
-                cur.execute("UPDATE teachers_users SET password = %s WHERE username = %s", (hashed_password.decode('utf-8'), identifier))
+                cur.execute("UPDATE teachers_users SET password = %s WHERE username = %s", (hashed_password, identifier))
             elif role == "admin":
-                cur.execute("UPDATE admin_users SET password = %s WHERE username = %s", (hashed_password.decode('utf-8'), identifier))
+                cur.execute("UPDATE admin_users SET password = %s WHERE username = %s", (hashed_password, identifier))
 
             conn.commit()
             cur.close()
