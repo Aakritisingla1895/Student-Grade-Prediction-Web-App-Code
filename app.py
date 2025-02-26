@@ -51,7 +51,7 @@ def login():
             session["username"] = username
             session["role"] = role
             flash("Login successful!", "success")
-            return redirect(url_for("dashboard"))  # Redirect to dashboard
+            return redirect(url_for("dashboard"))
         else:
             flash("Invalid credentials. Please try again.", "danger")
     return render_template("login.html")
@@ -84,6 +84,30 @@ def signup():
         return redirect(url_for("login"))
     return render_template("signup.html")
 
+@app.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        username = request.form["username"]
+        new_password = request.form["new_password"]
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM students_users WHERE username = %s", (username,))
+        user = cur.fetchone()
+
+        if user:
+            # Hash new password
+            hashed_password = hash_password(new_password)
+            cur.execute("UPDATE students_users SET password = %s WHERE username = %s", (hashed_password.decode('utf-8'), username))
+            conn.commit()
+            cur.close()
+            conn.close()
+            flash("Password updated successfully! Please login with your new password.", "success")
+            return redirect(url_for("login"))
+        else:
+            flash("Username not found. Please try again.", "danger")
+    return render_template("forgot_password.html")
+
 @app.route("/user_form", methods=["GET", "POST"])
 def user_form():
     if "username" not in session:
@@ -94,7 +118,6 @@ def user_form():
         # Save answers to the database or process them for prediction
         flash("Form submitted successfully!", "success")
         return redirect(url_for("dashboard"))
-
     return render_template("user_form.html", username=session["username"])
 
 @app.route("/dashboard")

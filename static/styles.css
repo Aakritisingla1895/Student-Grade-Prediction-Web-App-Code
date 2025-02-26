@@ -9,3 +9,15 @@ body {
 .alert {
     margin-top: 20px;
 }
+
+/* Custom CSS for small square tabs */
+.btn-square {
+    width: 100px; /* Fixed width for square shape */
+    height: 40px; /* Fixed height for square shape */
+    padding: 0; /* Remove padding to make it compact */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px; /* Slightly rounded corners */
+    font-size: 14px; /* Smaller font size */
+}
