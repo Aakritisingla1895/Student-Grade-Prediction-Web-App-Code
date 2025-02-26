@@ -178,17 +178,62 @@ def forgot_password():
     return render_template("forgot_password.html")
 
 
-@app.route("/user_form", methods=["GET", "POST"])
-def user_form():
+@app.route("/user_form", defaults={"subject": "english"}, methods=["GET", "POST"])
+@app.route("/user_form/<subject>", methods=["GET", "POST"])
+def user_form(subject):
     if "username" not in session:
         return redirect(url_for("login"))
 
-    if request.method == "POST":
-        answers = [request.form[f"q{i}"] for i in range(1, 6)]
-        # Save answers to the database or process them for prediction
-        flash("Form submitted successfully!", "success")
+    student_id = session.get("username")  # Assuming student_id is stored in session
+
+    # Fetch student's first name and last name from students_users table
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT first_name, last_name FROM students_users WHERE student_id = %s", (student_id,))
+    student_info = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not student_info:
+        flash("Student information not found.", "danger")
         return redirect(url_for("dashboard"))
-    return render_template("user_form.html", username=session["username"])
+
+    first_name, last_name = student_info
+
+    # Fetch subject-specific data
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Determine the table based on the subject
+    if subject == "english":
+        cur.execute("SELECT * FROM english_dataset WHERE student_id = %s", (student_id,))
+    elif subject == "physics":
+        cur.execute("SELECT * FROM physics_dataset WHERE student_id = %s", (student_id,))
+    elif subject == "mathematics":
+        cur.execute("SELECT * FROM maths_dataset WHERE student_id = %s", (student_id,))
+    elif subject == "computer_science":
+        cur.execute("SELECT * FROM computer_science_dataset WHERE student_id = %s", (student_id,))
+
+    student_data = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not student_data:
+        flash("No data found for this student.", "danger")
+        return redirect(url_for("dashboard"))
+
+    # Pass the fetched data to the template
+    return render_template("user_form.html", 
+                           username=session["username"], 
+                           student_id=student_id, 
+                           first_name=first_name,
+                           last_name=last_name,
+                           age=student_data[3],  # Assuming age is at index 3
+                           gender=student_data[2],  # Assuming gender is at index 2
+                           subject=subject,
+                           student_data=student_data)
+
+
 
 @app.route("/dashboard")
 def dashboard():
