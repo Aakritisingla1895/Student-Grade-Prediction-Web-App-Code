@@ -8,11 +8,18 @@ import pickle
 import joblib  # For efficient model serialization
 import numpy as np
 
+import openai
+import os
+
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+# Set your OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
 app.permanent_session_lifetime = timedelta(days=1)  # Session expires after 1 day
 
 # Database connection
@@ -275,6 +282,56 @@ def predict_score(subject):
     except Exception as e:
         flash(f"Prediction failed: {str(e)}", "danger")
         return redirect(url_for('test_prediction', subject=subject))
+import openai
+
+def generate_ai_summary(predicted_g4):
+    """
+    Generate a concise AI-based summary and recommendations using OpenAI's GPT-3.5 Turbo model.
+    The output is formatted as follows:
+    
+    **Summary:**
+    [Write a brief summary here]
+
+    **Recommendations:**
+    - [Recommendation 1]
+    - [Recommendation 2]
+    - [Recommendation 3]
+    - [Recommendation 4]
+    - [Recommendation 5]
+    """
+    # Define the prompt
+    prompt = f"""
+    The student's predicted G4 score is {predicted_g4}/100. Provide a concise summary and actionable recommendations to improve their academic performance. Format the output as follows:
+
+    **Summary:**
+    [Write a brief summary here]
+
+    **Recommendations:**
+    - [Recommendation 1]
+    - [Recommendation 2]
+    - [Recommendation 3]
+    - [Recommendation 4]
+    - [Recommendation 5]
+    """
+
+    # Define the messages for the chat-based model
+    messages = [
+        {"role": "system", "content": "You are an educational assistant that provides concise summaries and actionable recommendations for students based on their predicted grades."},
+        {"role": "user", "content": prompt}
+    ]
+
+    # Call the OpenAI API with the chat-based model
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",  # Use the GPT-3.5 Turbo model
+        messages=messages,       # Pass the messages parameter
+        max_tokens=200,          # Limit the response length
+        temperature=0.7          # Controls creativity (0.7 is a good balance)
+    )
+
+    # Extract the generated content from the response
+    ai_summary = response.choices[0].message['content'].strip()
+    return ai_summary
+
 
 @app.route("/test_prediction/<subject>", methods=["GET", "POST"])
 def test_prediction(subject):
@@ -314,6 +371,7 @@ def test_prediction(subject):
     # Initialize variables with default values
     g1 = g2 = g3 = average_grade = max_score = g4 = predicted_g4 = 0
     accuracy = 95.15  # Example accuracy, replace with actual model accuracy
+    ai_summary = ""
 
     # Fetch dynamic data from the database
     try:
@@ -332,6 +390,8 @@ def test_prediction(subject):
     predicted_g4 = request.args.get('predicted_g4', None)
     if predicted_g4 is not None:
         predicted_g4 = float(predicted_g4)
+        # Generate AI-based summary and recommendations
+        ai_summary = generate_ai_summary(predicted_g4)
 
     # Pass the fetched data to the template
     return render_template("test_prediction.html", 
@@ -344,7 +404,9 @@ def test_prediction(subject):
                          g4=g4,
                          predicted_g4=predicted_g4,
                          accuracy=accuracy,
+                         ai_summary=ai_summary,
                          student_data=student_data)
+
 
 @app.route("/dashboard")
 def dashboard():
