@@ -13,8 +13,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
-# Set your OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
 
 app.permanent_session_lifetime = timedelta(days=1)  # Session expires after 1 day
