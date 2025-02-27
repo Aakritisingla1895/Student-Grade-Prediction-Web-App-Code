@@ -4,11 +4,8 @@ from dotenv import load_dotenv
 import os
 import bcrypt
 from datetime import timedelta
-import pickle
 import joblib  # For efficient model serialization
 import numpy as np
-
-import openai
 import os
 
 # Load environment variables
