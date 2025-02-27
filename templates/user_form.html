@@ -5,15 +5,15 @@
         <h2 class="text-center">Welcome, {{ first_name }} {{ last_name }}  Student ID: {{ username }}!</h2>
         <p class="text-center">You are logged in as a {{ role }}.</p>
 
-       <!-- Subject Navigation -->
-       <div class="mb-4 text-center">
-        <div class="d-flex justify-content-center gap-2">
-            <a href="{{ url_for('user_form', subject='english') }}" class="btn btn-outline-primary btn-square subject-tab" id="english-tab">English</a>
-            <a href="{{ url_for('user_form', subject='physics') }}" class="btn btn-outline-primary btn-square subject-tab" id="physics-tab">Physics</a>
-            <a href="{{ url_for('user_form', subject='mathematics') }}" class="btn btn-outline-primary btn-square subject-tab" id="mathematics-tab">Mathematics</a>
-            <a href="{{ url_for('user_form', subject='computer_science') }}" class="btn btn-outline-primary btn-square subject-tab" id="computer_science-tab">Computer Science</a>
+        <!-- Subject Navigation -->
+        <div class="mb-4 text-center">
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{{ url_for('user_form', subject='english') }}" class="btn btn-outline-primary btn-square subject-tab" id="english-tab">English</a>
+                <a href="{{ url_for('user_form', subject='physics') }}" class="btn btn-outline-primary btn-square subject-tab" id="physics-tab">Physics</a>
+                <a href="{{ url_for('user_form', subject='mathematics') }}" class="btn btn-outline-primary btn-square subject-tab" id="mathematics-tab">Mathematics</a>
+                <a href="{{ url_for('user_form', subject='computer_science') }}" class="btn btn-outline-primary btn-square subject-tab" id="computer_science-tab">Computer Science</a>
+            </div>
         </div>
-    </div>
 
         <!-- Student Information -->
         <div class="card mb-4">
@@ -41,155 +41,155 @@
                 <h5 class="card-title">{{ subject|title }} Details</h5>
             </div>
             <div class="card-body">
-               <!-- Inside the form in user_form.html -->
-                    <form method="POST" action="{{ url_for('test_prediction', subject=subject) }}">
-                        <!-- Address -->
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address (U for Urban, R for Rural)</label>
-                            <input type="text" class="form-control" id="address" name="address" value="{{ student_data[4] }}" required>  <!-- Assuming address is at index 4 -->
-                        </div>
+                <!-- Form with dynamic action for the current subject -->
+                <form method="POST" action="{{ url_for('test_prediction', subject=subject) }}">
+                    <!-- Address -->
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address (U for Urban, R for Rural)</label>
+                        <input type="text" class="form-control" id="address" name="address" value="{{ student_data[4] }}" required>
+                    </div>
 
-                        <!-- Family Size -->
-                        <div class="mb-3">
-                            <label for="famsize" class="form-label">Family Size (LE3 for less or equal to 3, GT3 for greater than 3)</label>
-                            <input type="text" class="form-control" id="famsize" name="famsize" value="{{ student_data[5] }}" required>  <!-- Assuming famsize is at index 5 -->
-                        </div>
+                    <!-- Family Size -->
+                    <div class="mb-3">
+                        <label for="famsize" class="form-label">Family Size (LE3 for less or equal to 3, GT3 for greater than 3)</label>
+                        <input type="text" class="form-control" id="famsize" name="famsize" value="{{ student_data[5] }}" required>
+                    </div>
 
-                        <!-- Parent's Cohabitation Status -->
-                        <div class="mb-3">
-                            <label for="pstatus" class="form-label">Parent's Cohabitation Status (T for living together, A for apart)</label>
-                            <input type="text" class="form-control" id="pstatus" name="pstatus" value="{{ student_data[6] }}" required>  <!-- Assuming pstatus is at index 6 -->
-                        </div>
+                    <!-- Parent's Cohabitation Status -->
+                    <div class="mb-3">
+                        <label for="pstatus" class="form-label">Parent's Cohabitation Status (T for living together, A for apart)</label>
+                        <input type="text" class="form-control" id="pstatus" name="pstatus" value="{{ student_data[6] }}" required>
+                    </div>
 
-                        <!-- Mother's Education -->
-                        <div class="mb-3">
-                            <label for="medu" class="form-label">Mother's Education (0 - none, 1 - primary, 2 - middle, 3 - secondary, 4 - higher)</label>
-                            <input type="number" class="form-control" id="medu" name="medu" value="{{ student_data[7] }}" min="0" max="4" required>  <!-- Assuming medu is at index 7 -->
-                        </div>
+                    <!-- Mother's Education -->
+                    <div class="mb-3">
+                        <label for="medu" class="form-label">Mother's Education (0 - none, 1 - primary, 2 - middle, 3 - secondary, 4 - higher)</label>
+                        <input type="number" class="form-control" id="medu" name="medu" value="{{ student_data[7] }}" min="0" max="4" required>
+                    </div>
 
-                        <!-- Father's Education -->
-                        <div class="mb-3">
-                            <label for="fedu" class="form-label">Father's Education (0 - none, 1 - primary, 2 - middle, 3 - secondary, 4 - higher)</label>
-                            <input type="number" class="form-control" id="fedu" name="fedu" value="{{ student_data[8] }}" min="0" max="4" required>  <!-- Assuming fedu is at index 8 -->
-                        </div>
+                    <!-- Father's Education -->
+                    <div class="mb-3">
+                        <label for="fedu" class="form-label">Father's Education (0 - none, 1 - primary, 2 - middle, 3 - secondary, 4 - higher)</label>
+                        <input type="number" class="form-control" id="fedu" name="fedu" value="{{ student_data[8] }}" min="0" max="4" required>
+                    </div>
 
-                        <!-- Mother's Job -->
-                        <div class="mb-3">
-                            <label for="mjob" class="form-label">Mother's Job</label>
-                            <select class="form-select" id="mjob" name="mjob" required>
-                                <option value="Full_time" {% if student_data[9] == "Full_time" %}selected{% endif %}>Full-time</option>
-                                <option value="Part_time" {% if student_data[9] == "Part_time" %}selected{% endif %}>Part-time</option>
-                                <option value="Hybrid" {% if student_data[9] == "Hybrid" %}selected{% endif %}>Hybrid</option>
-                                <option value="At_home" {% if student_data[9] == "At_home" %}selected{% endif %}>At home</option>
-                                <option value="Other" {% if student_data[9] == "Other" %}selected{% endif %}>Other</option>
-                            </select>
-                        </div>
+                    <!-- Mother's Job -->
+                    <div class="mb-3">
+                        <label for="mjob" class="form-label">Mother's Job</label>
+                        <select class="form-select" id="mjob" name="mjob" required>
+                            <option value="Full_time" {% if student_data[9] == "Full_time" %}selected{% endif %}>Full-time</option>
+                            <option value="Part_time" {% if student_data[9] == "Part_time" %}selected{% endif %}>Part-time</option>
+                            <option value="Hybrid" {% if student_data[9] == "Hybrid" %}selected{% endif %}>Hybrid</option>
+                            <option value="At_home" {% if student_data[9] == "At_home" %}selected{% endif %}>At home</option>
+                            <option value="Other" {% if student_data[9] == "Other" %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
 
-                        <!-- Father's Job -->
-                        <div class="mb-3">
-                            <label for="fjob" class="form-label">Father's Job</label>
-                            <select class="form-select" id="fjob" name="fjob" required>
-                                <option value="Full_time" {% if student_data[10] == "Full_time" %}selected{% endif %}>Full-time</option>
-                                <option value="Part_time" {% if student_data[10] == "Part_time" %}selected{% endif %}>Part-time</option>
-                                <option value="Hybrid" {% if student_data[10] == "Hybrid" %}selected{% endif %}>Hybrid</option>
-                                <option value="At_home" {% if student_data[10] == "At_home" %}selected{% endif %}>At home</option>
-                                <option value="Other" {% if student_data[10] == "Other" %}selected{% endif %}>Other</option>
-                            </select>
-                        </div>
+                    <!-- Father's Job -->
+                    <div class="mb-3">
+                        <label for="fjob" class="form-label">Father's Job</label>
+                        <select class="form-select" id="fjob" name="fjob" required>
+                            <option value="Full_time" {% if student_data[10] == "Full_time" %}selected{% endif %}>Full-time</option>
+                            <option value="Part_time" {% if student_data[10] == "Part_time" %}selected{% endif %}>Part-time</option>
+                            <option value="Hybrid" {% if student_data[10] == "Hybrid" %}selected{% endif %}>Hybrid</option>
+                            <option value="At_home" {% if student_data[10] == "At_home" %}selected{% endif %}>At home</option>
+                            <option value="Other" {% if student_data[10] == "Other" %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
 
-                        <!-- Travel Time -->
-                        <div class="mb-3">
-                            <label for="traveltime" class="form-label">Travel Time to School (1 - <15 min, 2 - 15 to 30 min, 3 - 30 min to 1 hour, 4 - >1 hour)</label>
-                            <input type="number" class="form-control" id="traveltime" name="traveltime" value="{{ student_data[11] }}" min="1" max="4" required>  <!-- Assuming traveltime is at index 11 -->
-                        </div>
+                    <!-- Travel Time -->
+                    <div class="mb-3">
+                        <label for="traveltime" class="form-label">Travel Time to School (1 - <15 min, 2 - 15 to 30 min, 3 - 30 min to 1 hour, 4 - >1 hour)</label>
+                        <input type="number" class="form-control" id="traveltime" name="traveltime" value="{{ student_data[11] }}" min="1" max="4" required>
+                    </div>
 
-                        <!-- Study Time -->
-                        <div class="mb-3">
-                            <label for="studytime" class="form-label">Weekly Study Time (1 - <2 hours, 2 - 2 to 5 hours, 3 - 5 to 10 hours, 4 - >10 hours)</label>
-                            <input type="number" class="form-control" id="studytime" name="studytime" value="{{ student_data[12] }}" min="1" max="4" required>  <!-- Assuming studytime is at index 12 -->
-                        </div>
+                    <!-- Study Time -->
+                    <div class="mb-3">
+                        <label for="studytime" class="form-label">Weekly Study Time (1 - <2 hours, 2 - 2 to 5 hours, 3 - 5 to 10 hours, 4 - >10 hours)</label>
+                        <input type="number" class="form-control" id="studytime" name="studytime" value="{{ student_data[12] }}" min="1" max="4" required>
+                    </div>
 
-                        <!-- Past Failures -->
-                        <div class="mb-3">
-                            <label for="failures" class="form-label">Number of Past Failures</label>
-                            <input type="number" class="form-control" id="failures" name="failures" value="{{ student_data[13] }}" min="0" required>  <!-- Assuming failures is at index 13 -->
-                        </div>
+                    <!-- Past Failures -->
+                    <div class="mb-3">
+                        <label for="failures" class="form-label">Number of Past Failures</label>
+                        <input type="number" class="form-control" id="failures" name="failures" value="{{ student_data[13] }}" min="0" required>
+                    </div>
 
-                        <!-- School Support -->
-                        <div class="mb-3">
-                            <label for="schoolsup" class="form-label">Extra Educational Support from School (yes or no)</label>
-                            <select class="form-select" id="schoolsup" name="schoolsup" required>
-                                <option value="yes" {% if student_data[14] == "yes" %}selected{% endif %}>Yes</option>
-                                <option value="no" {% if student_data[14] == "no" %}selected{% endif %}>No</option>
-                            </select>
-                        </div>
+                    <!-- School Support -->
+                    <div class="mb-3">
+                        <label for="schoolsup" class="form-label">Extra Educational Support from School (yes or no)</label>
+                        <select class="form-select" id="schoolsup" name="schoolsup" required>
+                            <option value="yes" {% if student_data[14] == "yes" %}selected{% endif %}>Yes</option>
+                            <option value="no" {% if student_data[14] == "no" %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
 
-                        <!-- Family Support -->
-                        <div class="mb-3">
-                            <label for="famsup" class="form-label">Family Educational Support (yes or no)</label>
-                            <select class="form-select" id="famsup" name="famsup" required>
-                                <option value="yes" {% if student_data[15] == "yes" %}selected{% endif %}>Yes</option>
-                                <option value="no" {% if student_data[15] == "no" %}selected{% endif %}>No</option>
-                            </select>
-                        </div>
+                    <!-- Family Support -->
+                    <div class="mb-3">
+                        <label for="famsup" class="form-label">Family Educational Support (yes or no)</label>
+                        <select class="form-select" id="famsup" name="famsup" required>
+                            <option value="yes" {% if student_data[15] == "yes" %}selected{% endif %}>Yes</option>
+                            <option value="no" {% if student_data[15] == "no" %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
 
-                        <!-- Paid Tuition -->
-                        <div class="mb-3">
-                            <label for="paid" class="form-label">Paid Extra Tuition (yes or no)</label>
-                            <select class="form-select" id="paid" name="paid" required>
-                                <option value="yes" {% if student_data[16] == "yes" %}selected{% endif %}>Yes</option>
-                                <option value="no" {% if student_data[16] == "no" %}selected{% endif %}>No</option>
-                            </select>
-                        </div>
+                    <!-- Paid Tuition -->
+                    <div class="mb-3">
+                        <label for="paid" class="form-label">Paid Extra Tuition (yes or no)</label>
+                        <select class="form-select" id="paid" name="paid" required>
+                            <option value="yes" {% if student_data[16] == "yes" %}selected{% endif %}>Yes</option>
+                            <option value="no" {% if student_data[16] == "no" %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
 
-                        <!-- Extracurricular Activities -->
-                        <div class="mb-3">
-                            <label for="activities" class="form-label">Extracurricular Activities (yes or no)</label>
-                            <select class="form-select" id="activities" name="activities" required>
-                                <option value="yes" {% if student_data[17] == "yes" %}selected{% endif %}>Yes</option>
-                                <option value="no" {% if student_data[17] == "no" %}selected{% endif %}>No</option>
-                            </select>
-                        </div>
+                    <!-- Extracurricular Activities -->
+                    <div class="mb-3">
+                        <label for="activities" class="form-label">Extracurricular Activities (yes or no)</label>
+                        <select class="form-select" id="activities" name="activities" required>
+                            <option value="yes" {% if student_data[17] == "yes" %}selected{% endif %}>Yes</option>
+                            <option value="no" {% if student_data[17] == "no" %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
 
-                        <!-- Free Time -->
-                        <div class="mb-3">
-                            <label for="freetime" class="form-label">Free Time After School (1 - very low to 5 - very high)</label>
-                            <input type="number" class="form-control" id="freetime" name="freetime" value="{{ student_data[18] }}" min="1" max="5" required>  <!-- Assuming freetime is at index 18 -->
-                        </div>
+                    <!-- Free Time -->
+                    <div class="mb-3">
+                        <label for="freetime" class="form-label">Free Time After School (1 - very low to 5 - very high)</label>
+                        <input type="number" class="form-control" id="freetime" name="freetime" value="{{ student_data[18] }}" min="1" max="5" required>
+                    </div>
 
-                        <!-- Going Out -->
-                        <div class="mb-3">
-                            <label for="goout" class="form-label">Going Out with Friends (1 - very low to 5 - very high)</label>
-                            <input type="number" class="form-control" id="goout" name="goout" value="{{ student_data[19] }}" min="1" max="5" required>  <!-- Assuming goout is at index 19 -->
-                        </div>
+                    <!-- Going Out -->
+                    <div class="mb-3">
+                        <label for="goout" class="form-label">Going Out with Friends (1 - very low to 5 - very high)</label>
+                        <input type="number" class="form-control" id="goout" name="goout" value="{{ student_data[19] }}" min="1" max="5" required>
+                    </div>
 
-                        <!-- Mobile Phone Usage -->
-                        <div class="mb-3">
-                            <label for="mobile" class="form-label">Mobile Phone Usage (1 - very low to 5 - very high)</label>
-                            <input type="number" class="form-control" id="mobile" name="mobile" value="{{ student_data[20] }}" min="1" max="5" required>  <!-- Assuming mobile is at index 20 -->
-                        </div>
+                    <!-- Mobile Phone Usage -->
+                    <div class="mb-3">
+                        <label for="mobile" class="form-label">Mobile Phone Usage (1 - very low to 5 - very high)</label>
+                        <input type="number" class="form-control" id="mobile" name="mobile" value="{{ student_data[20] }}" min="1" max="5" required>
+                    </div>
 
-                        <!-- TV Watching -->
-                        <div class="mb-3">
-                            <label for="tv" class="form-label">TV Watching Time (1 - very low to 5 - very high)</label>
-                            <input type="number" class="form-control" id="tv" name="tv" value="{{ student_data[21] }}" min="1" max="5" required>  <!-- Assuming tv is at index 21 -->
-                        </div>
+                    <!-- TV Watching -->
+                    <div class="mb-3">
+                        <label for="tv" class="form-label">TV Watching Time (1 - very low to 5 - very high)</label>
+                        <input type="number" class="form-control" id="tv" name="tv" value="{{ student_data[21] }}" min="1" max="5" required>
+                    </div>
 
-                        <!-- Health Status -->
-                        <div class="mb-3">
-                            <label for="health" class="form-label">Health Status (1 - very bad to 5 - very good)</label>
-                            <input type="number" class="form-control" id="health" name="health" value="{{ student_data[22] }}" min="1" max="5" required>  <!-- Assuming health is at index 22 -->
-                        </div>
+                    <!-- Health Status -->
+                    <div class="mb-3">
+                        <label for="health" class="form-label">Health Status (1 - very bad to 5 - very good)</label>
+                        <input type="number" class="form-control" id="health" name="health" value="{{ student_data[22] }}" min="1" max="5" required>
+                    </div>
 
-                        <!-- Absences -->
-                        <div class="mb-3">
-                            <label for="absences" class="form-label">Number of School Absences</label>
-                            <input type="number" class="form-control" id="absences" name="absences" value="{{ student_data[23] }}" min="0" required>  <!-- Assuming absences is at index 23 -->
-                        </div>
+                    <!-- Absences -->
+                    <div class="mb-3">
+                        <label for="absences" class="form-label">Number of School Absences</label>
+                        <input type="number" class="form-control" id="absences" name="absences" value="{{ student_data[23] }}" min="0" required>
+                    </div>
 
-                        <!-- Next Button -->
-                        <button type="submit" class="btn btn-primary w-100">Next</button>
-                    </form>
+                    <!-- Next Button -->
+                    <button type="submit" class="btn btn-primary w-100">Next</button>
+                </form>
             </div>
         </div>
     </div>

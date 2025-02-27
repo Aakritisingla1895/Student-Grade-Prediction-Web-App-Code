@@ -4,7 +4,10 @@ from dotenv import load_dotenv
 import os
 import bcrypt
 from datetime import timedelta
-import joblib 
+import pickle
+import joblib  # For efficient model serialization
+import numpy as np
+
 # Load environment variables
 load_dotenv()
 
@@ -22,19 +25,14 @@ def get_db_connection():
         port=os.getenv("DB_PORT")
     )
 
-
-import bcrypt
-
 # Hash a password
 def hash_password(password):
-    # Generate a salt and hash the password
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed_password.decode('utf-8')  # Decode to store as a string in the database
 
 # Verify a password
 def check_password(hashed_password, user_password):
-    # Check if the provided password matches the hashed password
     return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 # Before request handler
@@ -135,7 +133,6 @@ def signup():
         return redirect(url_for("login"))
     return render_template("signup.html")
 
-
 @app.route("/forgot_password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
@@ -176,7 +173,6 @@ def forgot_password():
         else:
             flash("Identifier not found. Please try again.", "danger")
     return render_template("forgot_password.html")
-
 
 @app.route("/user_form", defaults={"subject": "english"}, methods=["GET", "POST"])
 @app.route("/user_form/<subject>", methods=["GET", "POST"])
@@ -233,53 +229,122 @@ def user_form(subject):
                            subject=subject,
                            student_data=student_data)
 
+@app.route("/predict_score/<subject>", methods=["POST"])
+def predict_score(subject):
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    # Load the appropriate model
+    model_path = os.path.join('models', f'{subject}_updated_random_forest_model.pkl')
+    if not os.path.exists(model_path):
+        flash(f"Model for {subject} not found.", "danger")
+        return redirect(url_for("dashboard"))
+
+    try:
+        # Use joblib to load the model (more efficient for large models)
+        model = joblib.load(model_path)
+
+        # Ensure the loaded object is a model
+        if not hasattr(model, 'predict'):
+            flash(f"Invalid model file for {subject}.", "danger")
+            return redirect(url_for("dashboard"))
+
+        # Get form data with default values
+        g1 = float(request.form.get('g1', 0.0))
+        g2 = float(request.form.get('g2', 0.0))
+        g3 = float(request.form.get('g3', 0.0))
+        average_grade = float(request.form.get('average_grade', 0.0))
+        max_score = float(request.form.get('max_score', 0.0))
+        studytime = float(request.form.get('studytime', 0.0))
+        medu = float(request.form.get('medu', 0.0))
+        going_out = float(request.form.get('going_out', 0.0))
+        traveltime = float(request.form.get('traveltime', 0.0))
+        activities = float(request.form.get('activities', 0.0))
+
+        # Prepare the input for prediction
+        input_data = [[g1, g2, g3, average_grade, max_score, studytime, medu, going_out, traveltime, activities]]
+
+        # Make prediction
+        predicted_g4 = model.predict(input_data)[0]
+
+        # Redirect back to the test prediction page with results
+        return redirect(url_for('test_prediction', 
+                               subject=subject, 
+                               predicted_g4=predicted_g4))
+
+    except Exception as e:
+        flash(f"Prediction failed: {str(e)}", "danger")
+        return redirect(url_for('test_prediction', subject=subject))
+
 @app.route("/test_prediction/<subject>", methods=["GET", "POST"])
 def test_prediction(subject):
     if "username" not in session:
         return redirect(url_for("login"))
 
-    student_id = session.get("username")  # Assuming student_id is stored in session
+    student_id = session.get("username")
 
-    # Fetch subject-specific data
+    # Determine the table name based on the subject
+    if subject == "english":
+        table_name = "english_dataset"
+    elif subject == "physics":
+        table_name = "physics_dataset"
+    elif subject == "mathematics":
+        table_name = "maths_dataset"
+    elif subject == "computer_science":
+        table_name = "computer_science_dataset"
+    else:
+        flash("Invalid subject.", "danger")
+        return redirect(url_for("dashboard"))
+
+    # Fetch subject-specific data from the database
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # Determine the table based on the subject
-    if subject == "english":
-        cur.execute("SELECT * FROM english_dataset WHERE student_id = %s", (student_id,))
-    elif subject == "physics":
-        cur.execute("SELECT * FROM physics_dataset WHERE student_id = %s", (student_id,))
-    elif subject == "mathematics":
-        cur.execute("SELECT * FROM maths_dataset WHERE student_id = %s", (student_id,))
-    elif subject == "computer_science":
-        cur.execute("SELECT * FROM computer_science_dataset WHERE student_id = %s", (student_id,))
-
+    # Query the appropriate table
+    query = f"SELECT * FROM {table_name} WHERE student_id = %s"
+    cur.execute(query, (student_id,))
     student_data = cur.fetchone()
     cur.close()
     conn.close()
 
     if not student_data:
-        flash("No data found for this student.", "danger")
+        flash(f"No data found for this student in {subject}.", "danger")
         return redirect(url_for("dashboard"))
 
-    # Bypass model prediction for now
-    # Use dummy or autopopulated data for the prediction screen
-    g1 = student_data[24]  # G1
-    g2 = student_data[25]  # G2
-    g3 = student_data[26]  # G3
-    average_grade = student_data[29]  # Average Grade
-    max_score = student_data[30]  # Max Score
-    predicted_g4 = 52.89  # Dummy predicted G4 score (replace with actual logic later)
+    # Initialize variables with default values
+    g1 = g2 = g3 = average_grade = max_score = g4 = predicted_g4 = 0
+    accuracy = 95.15  # Example accuracy, replace with actual model accuracy
 
-    # Pass the fetched data and dummy prediction to the template
+    # Fetch dynamic data from the database
+    try:
+        g1 = student_data[24]    # G1 (index 24)
+        g2 = student_data[25]    # G2 (index 25)
+        g3 = student_data[26]    # G3 (index 26)
+        average_grade = student_data[28]  # Average Grade (index 28)
+        max_score = student_data[29]      # Max Score (index 29)
+        g4 = student_data[30]             # G4 (index 30)
+    except IndexError as e:
+        print(f"IndexError: {e}")
+        flash(f"Data mismatch for {subject}.", "warning")
+        return redirect(url_for("dashboard"))
+
+    # Get predicted_g4 from query parameters if available
+    predicted_g4 = request.args.get('predicted_g4', None)
+    if predicted_g4 is not None:
+        predicted_g4 = float(predicted_g4)
+
+    # Pass the fetched data to the template
     return render_template("test_prediction.html", 
-                           subject=subject,
-                           g1=g1,
-                           g2=g2,
-                           g3=g3,
-                           average_grade=average_grade,
-                           max_score=max_score,
-                           predicted_g4=predicted_g4)
+                         subject=subject,
+                         g1=g1,
+                         g2=g2,
+                         g3=g3,
+                         average_grade=average_grade,
+                         max_score=max_score,
+                         g4=g4,
+                         predicted_g4=predicted_g4,
+                         accuracy=accuracy,
+                         student_data=student_data)
 
 @app.route("/dashboard")
 def dashboard():
@@ -297,5 +362,6 @@ def logout():
     session.clear()
     flash("You have been logged out.", "info")
     return redirect(url_for("login"))
+
 if __name__ == "__main__":
     app.run(debug=True)
