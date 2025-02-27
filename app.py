@@ -235,7 +235,6 @@ def user_form(subject):
                            gender=student_data[2],  # Assuming gender is at index 2
                            subject=subject,
                            student_data=student_data)
-
 @app.route("/predict_score/<subject>", methods=["POST"])
 def predict_score(subject):
     if "username" not in session:
@@ -274,17 +273,35 @@ def predict_score(subject):
         # Make prediction
         predicted_g4 = model.predict(input_data)[0]
 
+        # Prepare features for AI summary
+        features = {
+            'g1': g1,
+            'g2': g2,
+            'g3': g3,
+            'average_grade': average_grade,
+            'max_score': max_score,
+            'studytime': studytime,
+            'medu': medu,
+            'going_out': going_out,
+            'traveltime': traveltime,
+            'activities': activities
+        }
+
+        # Generate AI-based summary
+        ai_summary = generate_ai_summary(predicted_g4, features)
+
         # Redirect back to the test prediction page with results
         return redirect(url_for('test_prediction', 
                                subject=subject, 
-                               predicted_g4=predicted_g4))
+                               predicted_g4=predicted_g4,
+                               ai_summary=ai_summary))
 
     except Exception as e:
         flash(f"Prediction failed: {str(e)}", "danger")
         return redirect(url_for('test_prediction', subject=subject))
-import openai
+    
 
-def generate_ai_summary(predicted_g4):
+def generate_ai_summary(predicted_g4, features):
     """
     Generate a concise AI-based summary and recommendations using OpenAI's GPT-3.5 Turbo model.
     The output is formatted as follows:
@@ -301,7 +318,21 @@ def generate_ai_summary(predicted_g4):
     """
     # Define the prompt
     prompt = f"""
-    The student's predicted G4 score is {predicted_g4}/100. Provide a concise summary and actionable recommendations to improve their academic performance. Format the output as follows:
+    The student's predicted G4 score is {predicted_g4}/100. Based on the following features, provide a concise summary and actionable recommendations to improve their academic performance. Focus on the features that are contributing to the low predicted score.
+
+    Features:
+    - G1: {features['g1']}
+    - G2: {features['g2']}
+    - G3: {features['g3']}
+    - Average Grade: {features['average_grade']}
+    - Max Score: {features['max_score']}
+    - Study Time: {features['studytime']}
+    - Mother's Education: {features['medu']}
+    - Going Out: {features['going_out']}
+    - Travel Time: {features['traveltime']}
+    - Activities: {features['activities']}
+
+    Format the output as follows:
 
     **Summary:**
     [Write a brief summary here]
@@ -316,7 +347,7 @@ def generate_ai_summary(predicted_g4):
 
     # Define the messages for the chat-based model
     messages = [
-        {"role": "system", "content": "You are an educational assistant that provides concise summaries and actionable recommendations for students based on their predicted grades."},
+        {"role": "system", "content": "You are an educational assistant that provides concise summaries and actionable recommendations for students based on their predicted grades and input features."},
         {"role": "user", "content": prompt}
     ]
 
@@ -371,7 +402,7 @@ def test_prediction(subject):
     # Initialize variables with default values
     g1 = g2 = g3 = average_grade = max_score = g4 = predicted_g4 = 0
     accuracy = 95.15  # Example accuracy, replace with actual model accuracy
-    ai_summary = ""
+    ai_summary = request.args.get('ai_summary', "")
 
     # Fetch dynamic data from the database
     try:
@@ -390,8 +421,6 @@ def test_prediction(subject):
     predicted_g4 = request.args.get('predicted_g4', None)
     if predicted_g4 is not None:
         predicted_g4 = float(predicted_g4)
-        # Generate AI-based summary and recommendations
-        ai_summary = generate_ai_summary(predicted_g4)
 
     # Pass the fetched data to the template
     return render_template("test_prediction.html", 
