@@ -235,6 +235,7 @@ def user_form(subject):
                            gender=student_data[2],  # Assuming gender is at index 2
                            subject=subject,
                            student_data=student_data)
+
 @app.route("/predict_score/<subject>", methods=["POST"])
 def predict_score(subject):
     if "username" not in session:
@@ -273,96 +274,30 @@ def predict_score(subject):
         # Make prediction
         predicted_g4 = model.predict(input_data)[0]
 
-        # Prepare features for AI summary
-        features = {
-            'g1': g1,
-            'g2': g2,
-            'g3': g3,
-            'average_grade': average_grade,
-            'max_score': max_score,
-            'studytime': studytime,
-            'medu': medu,
-            'going_out': going_out,
-            'traveltime': traveltime,
-            'activities': activities
-        }
-
-        # Generate AI-based summary
-        ai_summary = generate_ai_summary(predicted_g4, features)
-
         # Redirect back to the test prediction page with results
         return redirect(url_for('test_prediction', 
                                subject=subject, 
-                               predicted_g4=predicted_g4,
-                               ai_summary=ai_summary))
+                               predicted_g4=predicted_g4))
 
     except Exception as e:
         flash(f"Prediction failed: {str(e)}", "danger")
         return redirect(url_for('test_prediction', subject=subject))
-    
-
-def generate_ai_summary(predicted_g4, features):
+def generate_ai_summary(predicted_g4):
     """
-    Generate a concise AI-based summary and recommendations using OpenAI's GPT-3.5 Turbo model.
-    The output is formatted as follows:
-    
-    **Summary:**
-    [Write a brief summary here]
-
-    **Recommendations:**
-    - [Recommendation 1]
-    - [Recommendation 2]
-    - [Recommendation 3]
-    - [Recommendation 4]
-    - [Recommendation 5]
+    Generate an AI-based summary and recommendations using OpenAI's GPT model.
     """
-    # Define the prompt
     prompt = f"""
-    The student's predicted G4 score is {predicted_g4}/100. Based on the following features, provide a concise summary and actionable recommendations to improve their academic performance. Focus on the features that are contributing to the low predicted score.
-
-    Features:
-    - G1: {features['g1']}
-    - G2: {features['g2']}
-    - G3: {features['g3']}
-    - Average Grade: {features['average_grade']}
-    - Max Score: {features['max_score']}
-    - Study Time: {features['studytime']}
-    - Mother's Education: {features['medu']}
-    - Going Out: {features['going_out']}
-    - Travel Time: {features['traveltime']}
-    - Activities: {features['activities']}
-
-    Format the output as follows:
-
-    **Summary:**
-    [Write a brief summary here]
-
-    **Recommendations:**
-    - [Recommendation 1]
-    - [Recommendation 2]
-    - [Recommendation 3]
-    - [Recommendation 4]
-    - [Recommendation 5]
+    The student's predicted G4 score is {predicted_g4}/100. 
+    Provide a detailed summary of their performance and actionable recommendations for improvement.
+    Focus on study habits, time management, and subject-specific strategies.
     """
-
-    # Define the messages for the chat-based model
-    messages = [
-        {"role": "system", "content": "You are an educational assistant that provides concise summaries and actionable recommendations for students based on their predicted grades and input features."},
-        {"role": "user", "content": prompt}
-    ]
-
-    # Call the OpenAI API with the chat-based model
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # Use the GPT-3.5 Turbo model
-        messages=messages,       # Pass the messages parameter
-        max_tokens=200,          # Limit the response length
-        temperature=0.7          # Controls creativity (0.7 is a good balance)
+    response = openai.Completion.create(
+        engine="text-davinci-003",  # Use the GPT-3.5 model
+        prompt=prompt,
+        max_tokens=300,  # Adjust based on the desired length of the response
+        temperature=0.7  # Controls creativity (0.7 is a good balance)
     )
-
-    # Extract the generated content from the response
-    ai_summary = response.choices[0].message['content'].strip()
-    return ai_summary
-
+    return response.choices[0].text.strip()
 
 @app.route("/test_prediction/<subject>", methods=["GET", "POST"])
 def test_prediction(subject):
@@ -402,7 +337,7 @@ def test_prediction(subject):
     # Initialize variables with default values
     g1 = g2 = g3 = average_grade = max_score = g4 = predicted_g4 = 0
     accuracy = 95.15  # Example accuracy, replace with actual model accuracy
-    ai_summary = request.args.get('ai_summary', "")
+    ai_summary = ""
 
     # Fetch dynamic data from the database
     try:
@@ -421,6 +356,8 @@ def test_prediction(subject):
     predicted_g4 = request.args.get('predicted_g4', None)
     if predicted_g4 is not None:
         predicted_g4 = float(predicted_g4)
+        # Generate AI-based summary and recommendations
+        ai_summary = generate_ai_summary(predicted_g4)
 
     # Pass the fetched data to the template
     return render_template("test_prediction.html", 
@@ -435,7 +372,6 @@ def test_prediction(subject):
                          accuracy=accuracy,
                          ai_summary=ai_summary,
                          student_data=student_data)
-
 
 @app.route("/dashboard")
 def dashboard():
