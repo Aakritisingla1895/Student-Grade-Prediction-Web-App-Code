@@ -278,22 +278,6 @@ def predict_score(subject):
     except Exception as e:
         flash(f"Prediction failed: {str(e)}", "danger")
         return redirect(url_for('test_prediction', subject=subject))
-def generate_ai_summary(predicted_g4):
-    """
-    Generate an AI-based summary and recommendations using OpenAI's GPT model.
-    """
-    prompt = f"""
-    The student's predicted G4 score is {predicted_g4}/100. 
-    Provide a detailed summary of their performance and actionable recommendations for improvement.
-    Focus on study habits, time management, and subject-specific strategies.
-    """
-    response = openai.Completion.create(
-        engine="text-davinci-003",  # Use the GPT-3.5 model
-        prompt=prompt,
-        max_tokens=300,  # Adjust based on the desired length of the response
-        temperature=0.7  # Controls creativity (0.7 is a good balance)
-    )
-    return response.choices[0].text.strip()
 
 @app.route("/test_prediction/<subject>", methods=["GET", "POST"])
 def test_prediction(subject):
