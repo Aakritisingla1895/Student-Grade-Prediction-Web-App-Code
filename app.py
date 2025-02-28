@@ -337,7 +337,7 @@ def test_prediction(subject):
     if predicted_g4 is not None:
         predicted_g4 = float(predicted_g4)
         # Generate AI-based summary and recommendations
-        ai_summary = generate_ai_summary(predicted_g4)
+        
 
     # Pass the fetched data to the template
     return render_template("test_prediction.html", 
