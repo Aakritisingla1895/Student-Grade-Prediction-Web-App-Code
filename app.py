@@ -268,6 +268,13 @@ def predict_score(subject):
         # Make prediction
         predicted_g4 = model.predict(input_data)[0]
 
+        # Store the prediction in the session
+        if 'predictions' not in session:
+            session['predictions'] = {}
+        session['predictions'][subject] = predicted_g4
+        session.modified = True  # Ensure the session is saved
+
+
         # Redirect back to the test prediction page with results
         return redirect(url_for('test_prediction', 
                                subject=subject, 
@@ -313,9 +320,11 @@ def test_prediction(subject):
         return redirect(url_for("dashboard"))
 
     # Initialize variables with default values
-    g1 = g2 = g3 = average_grade = max_score = g4 = predicted_g4 = 0
+    g1 = g2 = g3 = average_grade = max_score = g4 = 0
     accuracy = 95.15  # Example accuracy, replace with actual model accuracy
     ai_summary = ""
+    predicted_g4 = None
+    average_predicted = None
 
     # Fetch dynamic data from the database
     try:
@@ -330,15 +339,24 @@ def test_prediction(subject):
         flash(f"Data mismatch for {subject}.", "warning")
         return redirect(url_for("dashboard"))
 
-    # Get predicted_g4 from query parameters if available
-    predicted_g4 = request.args.get('predicted_g4', None)
+    # Get predicted_g4 from session
+    if 'predictions' in session:
+        predicted_g4 = session['predictions'].get(subject)
+
+    # Calculate average if on Computer Science and all predictions exist
+    if subject == 'computer_science' and 'predictions' in session:
+        predictions = session['predictions']
+        required_subjects = ['english', 'physics', 'mathematics', 'computer_science']
+        if all(subj in predictions for subj in required_subjects):
+            total = sum(predictions[subj] for subj in required_subjects)
+            average_predicted = total / 4
+
+    # Generate AI summary if prediction exists
     if predicted_g4 is not None:
-        predicted_g4 = float(predicted_g4)
-        # Generate AI-based summary and recommendations
-        
+        ai_summary = f"Based on your scores, the predicted final score is {predicted_g4:.2f}."
 
     # Pass the fetched data to the template
-    return render_template("test_prediction.html", 
+    return render_template("test_prediction.html",
                          subject=subject,
                          g1=g1,
                          g2=g2,
@@ -349,7 +367,9 @@ def test_prediction(subject):
                          predicted_g4=predicted_g4,
                          accuracy=accuracy,
                          ai_summary=ai_summary,
-                         student_data=student_data)
+                         student_data=student_data,
+                         average_predicted=average_predicted)
+
 
 @app.route('/live_testing', methods=['GET', 'POST'])
 def live_testing():
@@ -381,6 +401,13 @@ def live_testing():
             tv_watch_time = int(request.form.get('tv_watch_time'))
             health = int(request.form.get('health'))
             absences = int(request.form.get('absences'))
+            g1 = int(request.form.get('g1'))
+            g2 = int(request.form.get('g2'))
+            g3 = int(request.form.get('g3'))
+            no_of_hours = int(request.form.get('no_of_hours'))
+            average_grade = int(request.form.get('average_grade'))
+            max_score = int(request.form.get('max_score'))
+            g4 = int(request.form.get('g4'))
 
             conn = get_db_connection()
             cur = conn.cursor()
@@ -393,23 +420,34 @@ def live_testing():
                 'computer_science': 'computer_science_dataset'
             }.get(subject, 'english_dataset')  # default to english
 
-            cur.execute(f"""
-                INSERT INTO {table_name} (
+            # Check if student_id already exists in the database
+            cur.execute(f"SELECT student_id FROM {table_name} WHERE student_id = %s", (student_id,))
+            existing_student = cur.fetchone()
+
+            if existing_student:
+                # If student_id exists, show a warning message
+                flash(f'Data for Student ID {student_id} already exists!', 'warning')
+            else:
+                # If student_id does not exist, proceed with the submission
+                cur.execute(f"""
+                    INSERT INTO {table_name} (
+                        student_id, school, sex, age, address, famsize, pstatus,
+                        medu, fedu, mjob, fjob, traveltime, studytime, failures,
+                        schoolsup, famsup, paidtuition, activities, free_time,
+                        going_out, mobile_time, tv_watch_time, health, absences,
+                        g1, g2, g3, no_of_hours, average_grade, max_score, g4
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
                     student_id, school, sex, age, address, famsize, pstatus,
                     medu, fedu, mjob, fjob, traveltime, studytime, failures,
                     schoolsup, famsup, paidtuition, activities, free_time,
-                    going_out, mobile_time, tv_watch_time, health, absences
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
-                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                student_id, school, sex, age, address, famsize, pstatus,
-                medu, fedu, mjob, fjob, traveltime, studytime, failures,
-                schoolsup, famsup, paidtuition, activities, free_time,
-                going_out, mobile_time, tv_watch_time, health, absences
-            ))
+                    going_out, mobile_time, tv_watch_time, health, absences,
+                    g1, g2, g3, no_of_hours, average_grade, max_score, g4
+                ))
 
-            conn.commit()
-            flash('Data submitted successfully!', 'success')
+                conn.commit()
+                flash('Data submitted successfully!', 'success')
 
         except Exception as e:
             conn.rollback()

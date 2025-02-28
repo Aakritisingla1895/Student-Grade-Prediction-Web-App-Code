@@ -2,6 +2,16 @@
 
 {% block content %}
 <div class="container">
+    <!-- Disclaimer Box -->
+    <div class="alert alert-info mt-4" role="alert">
+        <strong>FILL THE DETAILS FOR LIVE TESTING:</strong> 
+        <ul class="mb-0">
+            <li>Select the subject for which you want to perform live testing.</li>
+            <li>Sign up first with the provided student ID.</li>
+            <li>Log in to view a few LIVE STUDENT ID PREDICTIONS.</li>
+        </ul>
+    </div>
+
     <h2>Live Testing</h2>
     <form method="POST" action="{{ url_for('live_testing') }}">
         <!-- Subject Selection -->
@@ -168,7 +178,55 @@
             <input type="number" class="form-control" id="absences" name="absences" min="0" required>
         </div>
 
+        <!-- New Fields -->
+        <div class="mb-3">
+            <label for="g1" class="form-label">Grade 1 (G1) out of 20 </label>
+            <input type="number" class="form-control" id="g1" name="g1" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="g2" class="form-label">Grade 2 (G2) out of 20</label>
+            <input type="number" class="form-control" id="g2" name="g2" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="g3" class="form-label">Grade 3 (G3) out of 20</label>
+            <input type="number" class="form-control" id="g3" name="g3" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="no_of_hours" class="form-label">Number of Hours</label>
+            <input type="number" class="form-control" id="no_of_hours" name="no_of_hours" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="average_grade" class="form-label">Average Grade of G1, G2 , G3 out of 20</label>
+            <input type="number" class="form-control" id="average_grade" name="average_grade" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="max_score" class="form-label">Max Score out of 20 </label>
+            <input type="number" class="form-control" id="max_score" name="max_score" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="g4" class="form-label">Grade 4 (G4) out of 100</label>
+            <input type="number" class="form-control" id="g4" name="g4" required>
+        </div>
+
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>
+
+<!-- Flash Messages Display -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} mt-4">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
 {% endblock %}
