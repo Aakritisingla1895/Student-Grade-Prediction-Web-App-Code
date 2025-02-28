@@ -38,18 +38,16 @@ def hash_password(password):
 def check_password(hashed_password, user_password):
     return bcrypt.checkpw(user_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-# Before request handler
 @app.before_request
 def check_session():
-    # Exclude login, signup, and static routes from session check
-    if request.endpoint in ["login", "signup", "forgot_password", "static"]:
+    # Exclude login, signup, forgot_password, live_testing, and static routes from session check
+    if request.endpoint in ["login", "signup", "forgot_password", "live_testing", "static"]:
         return
 
     # Redirect to login if the user is not logged in
     if "username" not in session:
         flash("You need to log in first.", "danger")
         return redirect(url_for("login"))
-
 # Routes
 @app.route("/")
 def home():
@@ -352,6 +350,78 @@ def test_prediction(subject):
                          accuracy=accuracy,
                          ai_summary=ai_summary,
                          student_data=student_data)
+
+@app.route('/live_testing', methods=['GET', 'POST'])
+def live_testing():
+    if request.method == "POST":
+        try:
+            # Collect all form fields
+            subject = request.form.get('subject')
+            student_id = request.form.get('student_id')
+            school = request.form.get('school')
+            sex = request.form.get('sex')
+            age = int(request.form.get('age'))
+            address = request.form.get('address')
+            famsize = request.form.get('famsize')
+            pstatus = request.form.get('pstatus')
+            medu = int(request.form.get('medu'))
+            fedu = int(request.form.get('fedu'))
+            mjob = request.form.get('mjob')
+            fjob = request.form.get('fjob')
+            traveltime = int(request.form.get('traveltime'))
+            studytime = int(request.form.get('studytime'))
+            failures = int(request.form.get('failures'))
+            schoolsup = request.form.get('schoolsup')
+            famsup = int(request.form.get('famsup'))
+            paidtuition = request.form.get('paidtuition')
+            activities = int(request.form.get('activities'))
+            free_time = int(request.form.get('free_time'))
+            going_out = int(request.form.get('going_out'))
+            mobile_time = int(request.form.get('mobile_time'))
+            tv_watch_time = int(request.form.get('tv_watch_time'))
+            health = int(request.form.get('health'))
+            absences = int(request.form.get('absences'))
+
+            conn = get_db_connection()
+            cur = conn.cursor()
+
+            # Dynamic table selection based on subject
+            table_name = {
+                'english': 'english_dataset',
+                'mathematics': 'maths_dataset',
+                'physics': 'physics_dataset',
+                'computer_science': 'computer_science_dataset'
+            }.get(subject, 'english_dataset')  # default to english
+
+            cur.execute(f"""
+                INSERT INTO {table_name} (
+                    student_id, school, sex, age, address, famsize, pstatus,
+                    medu, fedu, mjob, fjob, traveltime, studytime, failures,
+                    schoolsup, famsup, paidtuition, activities, free_time,
+                    going_out, mobile_time, tv_watch_time, health, absences
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 
+                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                student_id, school, sex, age, address, famsize, pstatus,
+                medu, fedu, mjob, fjob, traveltime, studytime, failures,
+                schoolsup, famsup, paidtuition, activities, free_time,
+                going_out, mobile_time, tv_watch_time, health, absences
+            ))
+
+            conn.commit()
+            flash('Data submitted successfully!', 'success')
+
+        except Exception as e:
+            conn.rollback()
+            flash(f'Error submitting data: {str(e)}', 'danger')
+            
+        finally:
+            cur.close()
+            conn.close()
+            return redirect(url_for('live_testing'))
+
+    # GET request - render empty form
+    return render_template('live_testing.html')
 
 @app.route("/dashboard")
 def dashboard():

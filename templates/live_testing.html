@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Live Testing</h2>
+    <form method="POST" action="{{ url_for('live_testing') }}">
+        <!-- Subject Selection -->
+        <div class="mb-3">
+            <label for="subject" class="form-label">Subject</label>
+            <select class="form-select" id="subject" name="subject" required>
+                <option value="english">English</option>
+                <option value="mathematics">Mathematics</option>
+                <option value="physics">Physics</option>
+                <option value="computer_science">Computer Science</option>
+            </select>
+        </div>
+
+        <!-- Student ID -->
+        <div class="mb-3">
+            <label for="student_id" class="form-label">Student ID</label>
+            <input type="number" class="form-control" id="student_id" name="student_id" required>
+        </div>
+
+        <!-- School -->
+        <div class="mb-3">
+            <label for="school" class="form-label">School (GP/MS)</label>
+            <input type="text" class="form-control" id="school" name="school" required>
+        </div>
+
+        <!-- Sex -->
+        <div class="mb-3">
+            <label for="sex" class="form-label">Sex (M/F)</label>
+            <input type="text" class="form-control" id="sex" name="sex" required>
+        </div>
+
+        <!-- Age -->
+        <div class="mb-3">
+            <label for="age" class="form-label">Age</label>
+            <input type="number" class="form-control" id="age" name="age" min="10" max="30" required>
+        </div>
+
+        <!-- Address -->
+        <div class="mb-3">
+            <label for="address" class="form-label">Address (U/R)</label>
+            <input type="text" class="form-control" id="address" name="address" required>
+        </div>
+
+        <!-- Family Size -->
+        <div class="mb-3">
+            <label for="famsize" class="form-label">Family Size (LE3/GT3)</label>
+            <input type="text" class="form-control" id="famsize" name="famsize" required>
+        </div>
+
+        <!-- Parent's Cohabitation Status -->
+        <div class="mb-3">
+            <label for="pstatus" class="form-label">Parent's Status (T/A)</label>
+            <input type="text" class="form-control" id="pstatus" name="pstatus" required>
+        </div>
+
+        <!-- Mother's Education -->
+        <div class="mb-3">
+            <label for="medu" class="form-label">Mother's Education (0-4)</label>
+            <input type="number" class="form-control" id="medu" name="medu" min="0" max="4" required>
+        </div>
+
+        <!-- Father's Education -->
+        <div class="mb-3">
+            <label for="fedu" class="form-label">Father's Education (0-4)</label>
+            <input type="number" class="form-control" id="fedu" name="fedu" min="0" max="4" required>
+        </div>
+
+        <!-- Mother's Job -->
+        <div class="mb-3">
+            <label for="mjob" class="form-label">Mother's Job</label>
+            <select class="form-select" id="mjob" name="mjob" required>
+                <option value="Full_time">Full-time</option>
+                <option value="Part_time">Part-time</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="At_home">At home</option>
+            </select>
+        </div>
+
+        <!-- Father's Job -->
+        <div class="mb-3">
+            <label for="fjob" class="form-label">Father's Job</label>
+            <select class="form-select" id="fjob" name="fjob" required>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Full_time">Full-time</option>
+                <option value="Part_time">Part-time</option>
+                <option value="At_home">At home</option>
+            </select>
+        </div>
+
+        <!-- Numeric Inputs -->
+        <div class="mb-3">
+            <label for="traveltime" class="form-label">Travel Time (1-4)</label>
+            <input type="number" class="form-control" id="traveltime" name="traveltime" min="1" max="4" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="studytime" class="form-label">Study Time (1-4)</label>
+            <input type="number" class="form-control" id="studytime" name="studytime" min="1" max="4" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="failures" class="form-label">Failures</label>
+            <input type="number" class="form-control" id="failures" name="failures" min="0" required>
+        </div>
+
+        <!-- School Support -->
+        <div class="mb-3">
+            <label for="schoolsup" class="form-label">School Support</label>
+            <select class="form-select" id="schoolsup" name="schoolsup" required>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+
+        <!-- Family Support -->
+        <div class="mb-3">
+            <label for="famsup" class="form-label">Family Support (0/1)</label>
+            <input type="number" class="form-control" id="famsup" name="famsup" min="0" max="1" required>
+        </div>
+
+        <!-- Paid Tuition -->
+        <div class="mb-3">
+            <label for="paidtuition" class="form-label">Paid Tuition</label>
+            <select class="form-select" id="paidtuition" name="paidtuition" required>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+
+        <!-- Activities -->
+        <div class="mb-3">
+            <label for="activities" class="form-label">Activities (0-4)</label>
+            <input type="number" class="form-control" id="activities" name="activities" min="0" max="4" required>
+        </div>
+
+        <!-- Remaining Fields -->
+        <div class="mb-3">
+            <label for="free_time" class="form-label">Free Time (1-5)</label>
+            <input type="number" class="form-control" id="free_time" name="free_time" min="1" max="5" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="going_out" class="form-label">Going Out (1-5)</label>
+            <input type="number" class="form-control" id="going_out" name="going_out" min="1" max="5" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="mobile_time" class="form-label">Mobile Time (1-5)</label>
+            <input type="number" class="form-control" id="mobile_time" name="mobile_time" min="1" max="5" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="tv_watch_time" class="form-label">TV Time (1-5)</label>
+            <input type="number" class="form-control" id="tv_watch_time" name="tv_watch_time" min="1" max="5" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="health" class="form-label">Health (1-5)</label>
+            <input type="number" class="form-control" id="health" name="health" min="1" max="5" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="absences" class="form-label">Absences</label>
+            <input type="number" class="form-control" id="absences" name="absences" min="0" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock %}
